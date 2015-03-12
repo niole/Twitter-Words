@@ -2,28 +2,29 @@
 /*global React*/
 
 var Displaytweet = React.createClass({
-  loadTweet: function() {
-    $.getJSON('/statuses/tweets', function(data) {
-      this.setState({tweets: data});
-      this.makeChart();
-    }.bind(this));
+  loadChart: function() {
+    this.setState({tweets: []});
+    this.makeChart(this.itertweets());
   },
   getInitialState: function() {
     return {tweets: []};
   },
   componentDidMount: function() {
-    this.loadTweet();
+    this.loadChart();
   },
   itertweets: function() {
     var histolist = [];
     var tweetdict = {};
-
+    if (this.state.tweets.length === 0) {
+      return histolist;
+    }
+    else {
     _.forEach(this.state.tweets, function(val, i) {
-      console.log(val);
+    //  console.log(val);
     });
     _.forEach(this.state.tweets, function(val, i) {
-      console.log(val);
-      console.log(typeof(val));
+     //console.log(val);
+     //console.log(typeof(val));
       var splittweet = val.split(' ');
       _.forEach(splittweet, function(val, i) {
         if (val in tweetdict) {
@@ -39,14 +40,10 @@ var Displaytweet = React.createClass({
       histolist.push([k, tweetdict[k]]);
       }
     }
-    console.log('hl');
-    console.log(histolist);
-    console.log('td');
-    console.log(tweetdict);
     return histolist;
+    }
   },
-  makeChart: function() {
-    var histolist = this.itertweets();
+  makeChart: function(histolist) {
     $('#container').highcharts({
         chart: {
             type: 'column'
@@ -82,21 +79,43 @@ var Displaytweet = React.createClass({
         series: [{
             name: 'Population',
             data: this.itertweets(),
-            dataLabels: {
-                enabled: true,
-                rotation: -90,
-                color: '#FFFFFF',
-                align: 'right',
-                format: '{point.y:.1f}', // one decimal
-                y: 10, // 10 pixels down from the top
-                style: {
-                    fontSize: '13px',
-                    fontFamily: 'Verdana, sans-serif'
-                }
-            }
+            //dataLabels: {
+                //enabled: true,
+                //rotation: -90,
+                //color: '#FFFFFF',
+                //align: 'right',
+                //format: '{point.y:.1f}', // one decimal
+                //y: 10, // 10 pixels down from the top
+                //style: {
+                    //fontSize: '13px',
+                    //fontFamily: 'Verdana, sans-serif'
+                //}
+            //}
    }]
 });
 },
+  _handleUpdateChart: function(data, customHistInput) {
+    console.log('in handle update chart');
+    console.log(customHistInput);
+    console.log(data);
+    var dataToSearch = [];
+    if (customHistInput.length !== 0) {
+      // TODO filter out tweets without any words in customHistInput
+      _.forEach(data, function(tweetstring) {
+        _.forEach(customHistInput, function(chosenword) {
+          if (tweetstring.includes(chosenword)) {
+            dataToSearch.push(chosenword);
+          }
+        });
+      });
+    this.setState({tweets: dataToSearch});
+    this.makeChart(this.itertweets());
+    }
+    else {
+    this.setState({tweets: data});
+    this.makeChart(this.itertweets());
+    }
+  },
   render: function() {
     var divStyle = {
       'minWidth': '300px',
@@ -105,15 +124,17 @@ var Displaytweet = React.createClass({
     };
     return (
       <div>
-        <SNform grabSN={this.load/>
+        <SNform updateChart={this._handleUpdateChart}/>
         <div id="container" style={divStyle}/>
       </div>
     );
-
   }
 });
 
 var SNform = React.createClass({
+  propTypes: {
+    updateChart: React.PropTypes.func.isRequired,
+  },
   render: function() {
     return (
       <form onSubmit={this.grabSN}>
@@ -125,16 +146,26 @@ var SNform = React.createClass({
   grabSN: function(e) {
     e.preventDefault();
     var chosenSN = $(e.target).find("input[name=SN]").val();
+    var splitSN = chosenSN.split(' ');
+    console.log('sliced');
+    console.log(splitSN.slice(0,1));
+    var customHistInput = [];
+    if (splitSN.length > 1) {
+      customHistInput = splitSN.slice(1,splitSN.length);
+    }
     console.log('chosenSN');
     console.log(chosenSN);
     $.ajax({
       url: '/statuses/setSN',
       dataType: 'json',
       type: 'POST',
-      data: chosenSN,
+      data: { 'screenName': splitSN.slice(0,1).toString() },
       success: function(data) {
-        console.log('sn saved');
-        }.bind(this),
+        console.log('success');
+        console.log('customhist');
+        console.log(customHistInput);
+        this.props.updateChart(data, customHistInput);
+      }.bind(this),
       error: function(xhr,status,err) {
         console.error(this.props.url,status.err.toString());
       }.bind(this)

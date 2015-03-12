@@ -12,17 +12,17 @@ var client = new Twitter({
 });
 
 router.post('/setSN', function(req, res) {
-  var SN = Object.keys(req);
-  client.get('statuses/user_timeline', {screen_name: SN}, function(error, tweets, response){
-    console.log('sn');
-    console.log(req.body);
+  var SN = req.body["screenName"];
+  console.log('Twitter client GET with sn=' + SN);
+  client.get('statuses/user_timeline', { screen_name: SN, count: 200 }, function(error, tweets, response){
+    console.log(error);
     if (!error) {
-    res.json(_.map(tweets, function(x) {return x.text;}));
+      res.json(_.map(tweets, function(x) { return x.text; }));
     }
   });
 });
 
-var params = {screen_name: 'BarackObama'};
+var params = {screen_name: ''};
 router.get('/tweets', function(req, res) {
   client.get('statuses/user_timeline', params, function(error, tweets, response){
     if (!error) {
