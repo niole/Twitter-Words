@@ -72,24 +72,9 @@ var Displaytweet = React.createClass({
    }]
 });
 },
-  _handleUpdateChart: function(data, customHistInput, screenname) {
-    var dataToSearch = [];
-    if (customHistInput.length !== 0) {
-      // TODO filter out tweets without any words in customHistInput
-      _.forEach(data, function(tweetstring) {
-        _.forEach(customHistInput, function(chosenword) {
-          if (tweetstring.includes(chosenword)) {
-            dataToSearch.push(chosenword);
-          }
-        });
-      });
-    this.setState({tweets: dataToSearch});
-    this.makeChart(this.itertweets(), screenname);
-    }
-    else {
+  _handleUpdateChart: function(data, screenname) {
     this.setState({tweets: data});
     this.makeChart(this.itertweets(), screenname);
-    }
   },
   render: function() {
     var divStyle = {
@@ -120,22 +105,14 @@ var SNform = React.createClass({
   },
   grabSN: function(e) {
     e.preventDefault();
-
-//TODO: remove customhistinput feature
-
     var chosenSN = $(e.target).find("input[name=SN]").val();
-    var splitSN = chosenSN.split(' ');
-    var customHistInput = [];
-    if (splitSN.length > 1) {
-      customHistInput = splitSN.slice(1,splitSN.length);
-    }
     $.ajax({
       url: '/statuses/setSN',
       dataType: 'json',
       type: 'POST',
-      data: { 'screenName': splitSN.slice(0,1).toString() },
+      data: { 'screenName': chosenSN },
       success: function(data) {
-        this.props.updateChart(data, customHistInput, chosenSN);
+        this.props.updateChart(data, chosenSN);
       }.bind(this),
       error: function(xhr,status,err) {
         console.error(this.props.url,status.err.toString());
