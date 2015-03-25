@@ -2,10 +2,6 @@
 /*global React*/
 
 var Displaytweet = React.createClass({
-  loadChart: function() {
-    this.setState({tweets: []});
-    this.makeChart(this.itertweets());
-  },
   getInitialState: function() {
     return {tweets: []};
   },
@@ -37,13 +33,13 @@ var Displaytweet = React.createClass({
     return histolist;
     }
   },
-  makeChart: function(histolist) {
+  makeChart: function(histolist, screenname) {
     $('#container').highcharts({
         chart: {
             type: 'column'
         },
         title: {
-            text: 'Histogram of Words Tweeted by Inputted Screenname'
+            text: 'Histogram of Words Tweeted by ' + screenname
         },
         subtitle: {
             text: 'Source: Twitter'// <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
@@ -76,7 +72,7 @@ var Displaytweet = React.createClass({
    }]
 });
 },
-  _handleUpdateChart: function(data, customHistInput) {
+  _handleUpdateChart: function(data, customHistInput, screenname) {
     var dataToSearch = [];
     if (customHistInput.length !== 0) {
       // TODO filter out tweets without any words in customHistInput
@@ -88,11 +84,11 @@ var Displaytweet = React.createClass({
         });
       });
     this.setState({tweets: dataToSearch});
-    this.makeChart(this.itertweets());
+    this.makeChart(this.itertweets(), screenname);
     }
     else {
     this.setState({tweets: data});
-    this.makeChart(this.itertweets());
+    this.makeChart(this.itertweets(), screenname);
     }
   },
   render: function() {
@@ -124,6 +120,9 @@ var SNform = React.createClass({
   },
   grabSN: function(e) {
     e.preventDefault();
+
+//TODO: remove customhistinput feature
+
     var chosenSN = $(e.target).find("input[name=SN]").val();
     var splitSN = chosenSN.split(' ');
     var customHistInput = [];
@@ -136,7 +135,7 @@ var SNform = React.createClass({
       type: 'POST',
       data: { 'screenName': splitSN.slice(0,1).toString() },
       success: function(data) {
-        this.props.updateChart(data, customHistInput);
+        this.props.updateChart(data, customHistInput, chosenSN);
       }.bind(this),
       error: function(xhr,status,err) {
         console.error(this.props.url,status.err.toString());
