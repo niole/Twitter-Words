@@ -9,9 +9,6 @@ var Displaytweet = React.createClass({
   getInitialState: function() {
     return {tweets: []};
   },
-  componentDidMount: function() {
-    this.loadChart();
-  },
   itertweets: function() {
     var histolist = [];
     var tweetdict = {};
@@ -20,11 +17,8 @@ var Displaytweet = React.createClass({
     }
     else {
     _.forEach(this.state.tweets, function(val, i) {
-    //  console.log(val);
     });
     _.forEach(this.state.tweets, function(val, i) {
-     //console.log(val);
-     //console.log(typeof(val));
       var splittweet = val.split(' ');
       _.forEach(splittweet, function(val, i) {
         if (val in tweetdict) {
@@ -49,10 +43,10 @@ var Displaytweet = React.createClass({
             type: 'column'
         },
         title: {
-            text: 'World\'s largest cities per 2014'
+            text: 'Histogram of Words Tweeted by Inputted Screenname'
         },
         subtitle: {
-            text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+            text: 'Source: Twitter'// <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
         },
         xAxis: {
             type: 'category',
@@ -67,37 +61,22 @@ var Displaytweet = React.createClass({
         yAxis: {
             min: 0,
             title: {
-                text: 'Population (millions)'
+                text: ''
             }
         },
         legend: {
             enabled: false
         },
         tooltip: {
-            pointFormat: 'Population in 2008: <b>{point.y:.1f} millions</b>'
+            pointFormat: 'number of times tweeted: <b>{point.y:.1f}</b>'
         },
         series: [{
             name: 'Population',
             data: this.itertweets(),
-            //dataLabels: {
-                //enabled: true,
-                //rotation: -90,
-                //color: '#FFFFFF',
-                //align: 'right',
-                //format: '{point.y:.1f}', // one decimal
-                //y: 10, // 10 pixels down from the top
-                //style: {
-                    //fontSize: '13px',
-                    //fontFamily: 'Verdana, sans-serif'
-                //}
-            //}
    }]
 });
 },
   _handleUpdateChart: function(data, customHistInput) {
-    console.log('in handle update chart');
-    console.log(customHistInput);
-    console.log(data);
     var dataToSearch = [];
     if (customHistInput.length !== 0) {
       // TODO filter out tweets without any words in customHistInput
@@ -137,7 +116,7 @@ var SNform = React.createClass({
   },
   render: function() {
     return (
-      <form onSubmit={this.grabSN}>
+      <form onSubmit={this.grabSN} className="jumbotron">
         <input type="text" name="SN" placeholder="pick a screen name.."/>
         <input className="btn btn-primary" type="submit" value="submit"/>
       </form>
@@ -147,23 +126,16 @@ var SNform = React.createClass({
     e.preventDefault();
     var chosenSN = $(e.target).find("input[name=SN]").val();
     var splitSN = chosenSN.split(' ');
-    console.log('sliced');
-    console.log(splitSN.slice(0,1));
     var customHistInput = [];
     if (splitSN.length > 1) {
       customHistInput = splitSN.slice(1,splitSN.length);
     }
-    console.log('chosenSN');
-    console.log(chosenSN);
     $.ajax({
       url: '/statuses/setSN',
       dataType: 'json',
       type: 'POST',
       data: { 'screenName': splitSN.slice(0,1).toString() },
       success: function(data) {
-        console.log('success');
-        console.log('customhist');
-        console.log(customHistInput);
         this.props.updateChart(data, customHistInput);
       }.bind(this),
       error: function(xhr,status,err) {
