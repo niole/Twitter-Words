@@ -1,0 +1,22 @@
+{
+  "name": "application-name",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "~1.0.0",
+    "cookie-parser": "~1.0.1",
+    "debug": "~0.7.4",
+    "dotenv": "^0.5.1",
+    "express": "~4.0.0",
+    "jade": "*",
+    "lodash": "^3.5.0",
+    "mongodb": "*",
+    "mongoskin": "*",
+    "morgan": "~1.0.0",
+    "serve-favicon": "*",
+    "twitter": "^1.2.3"
+  }
+}
