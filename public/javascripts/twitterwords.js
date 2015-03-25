@@ -112,7 +112,6 @@ var SNform = React.createClass({
       type: 'POST',
       data: { 'screenName': chosenSN },
       success: function(data) {
-        console.log(data);
         this.props.updateChart(data, chosenSN);
       }.bind(this),
       error: function(xhr,status,err) {

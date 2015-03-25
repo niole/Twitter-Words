@@ -15,7 +15,6 @@ router.post('/setSN', function(req, res) {
   var SN = req.body["screenName"];
   console.log('Twitter client GET with sn=' + SN);
   client.get('statuses/user_timeline', { screen_name: SN, count: 200 }, function(error, tweets, response){
-    console.log(tweets);
     if (!error) {
       res.json(_.map(tweets, function(x) { return x.text; }));
     }
